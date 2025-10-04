@@ -1,64 +1,40 @@
-from app.schemas.prediction import PredictionRequest, PredictionResponse, JustificationItem, CompetitiveAnalysis
-import random
+from app.schemas.prediction import PredictionRequest, PredictionResponse
+import joblib
+import pandas as pd
+from pathlib import Path
+
+# Obtener la ruta absoluta al directorio actual del archivo
+BASE_DIR = Path(__file__).resolve(strict=True).parent
+
+# Cargar el modelo una sola vez cuando se inicie la aplicación
+try:
+    model_path = Path(BASE_DIR).parent / "models" / "model.pkl"
+    model = joblib.load(model_path)
+except FileNotFoundError:
+    model = None
+except Exception as e:
+    # Manejar otros posibles errores de carga
+    print(f"Error al cargar el modelo: {e}")
+    model = None
 
 def predict_price(request: PredictionRequest) -> PredictionResponse:
     """
-    Simula la lógica de un modelo de IA para predecir el precio.
-    Genera datos falsos pero realistas basados en la entrada.
+    Realiza una predicción de precio utilizando el modelo de machine learning cargado.
     """
-    # Fórmula de simulación simple para el precio base
-    base_price_per_night = 50 + (request.guests * 15) + (request.rooms * 25) + (request.beds * 5)
-    total_price = base_price_per_night * request.nights
+    if model is None:
+        # Opcional: puedes devolver un error específico si el modelo no se cargó
+        raise RuntimeError("El modelo de predicción no está disponible.")
 
-    # Simulación de análisis competitivo
-    neighborhood_avg_nightly = base_price_per_night * random.uniform(0.8, 1.1)
-    neighborhood_max_nightly = neighborhood_avg_nightly * random.uniform(1.5, 2.0)
-
-    print("Data App", request)
-
-    # Simulación de justificación
-    justification = []
-    if request.guests > 4:
-        justification.append(JustificationItem(
-            description="El alto número de huéspedes justifica un precio mayor.",
-            impact=request.guests * 5.0,
-            type="positive"
-        ))
-    if request.rooms > 2:
-        justification.append(JustificationItem(
-            description="Más habitaciones que el promedio en la zona.",
-            impact=request.rooms * 10.0,
-            type="positive"
-        ))
-    if request.nights < 2:
-        justification.append(JustificationItem(
-            description="Las estancias cortas suelen tener una tarifa por noche más alta.",
-            impact=15.0,
-            type="positive"
-        ))
-    else:
-        justification.append(JustificationItem(
-            description="Precio ajustado para una estancia de varias noches.",
-            impact=-10.0,
-            type="negative"
-        ))
-
-    # Calcular el precio sugerido final
-    suggested_price = total_price + sum(item.impact for item in justification)
+    # Convertir la solicitud de entrada en un DataFrame de pandas
+    # Asegúrate de que el orden de las columnas coincida con el que espera el modelo
+    feature_names = ['latitude', 'longitude', 'accommodates', 'bedrooms', 'beds', 'minimum_nights']
     
-    # Asegurarse de que el precio no sea negativo
-    suggested_price = max(suggested_price, 50.0)
+    input_data = pd.DataFrame([request.dict(include=set(feature_names))], columns=feature_names)
 
-    # Calcular el porcentaje sobre el promedio del vecindario
-    percentage_vs_average = ((suggested_price / (neighborhood_avg_nightly * request.nights)) - 1) * 100 if neighborhood_avg_nightly > 0 else 0
+    # Realizar la predicción
+    prediction = model.predict(input_data)
 
-    return PredictionResponse(
-        suggested_price=round(suggested_price, 2),
-        percentage_vs_average=round(percentage_vs_average, 2),
-        justification=justification,
-        competitive_analysis=CompetitiveAnalysis(
-            your_price=round(suggested_price, 2),
-            neighborhood_average=round(neighborhood_avg_nightly * request.nights, 2),
-            neighborhood_max=round(neighborhood_max_nightly * request.nights, 2)
-        )
-    )
+    # El resultado de la predicción suele ser un array de numpy, tomamos el primer elemento
+    suggested_price = prediction[0]
+
+    return PredictionResponse(suggested_price=round(suggested_price, 2))
