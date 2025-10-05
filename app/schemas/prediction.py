@@ -4,10 +4,11 @@ from typing import List
 class PredictionRequest(BaseModel):
     latitude: float
     longitude: float
-    accommodates: int
-    bedrooms: int
-    beds: int
-    minimum_nights: int
+    accommodates: float
+    bedrooms: float
+    beds: float
+    minimum_nights: float
 
 class PredictionResponse(BaseModel):
     suggested_price: float
+    currency: str = "EUR"

@@ -1,6 +1,8 @@
 fastapi
 uvicorn[standard]
 pydantic
-joblib
 scikit-learn
 pandas
+mlflow
+dagshub
+python-dotenv

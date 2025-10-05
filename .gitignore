@@ -22,3 +22,10 @@ dist/
 # Archivos de sistema operativo
 .DS_Store
 Thumbs.db
+
+# Archivos de credenciales y configuración local
+.env
+
+# Datos y artefactos descargados
+data/
+mlruns/
