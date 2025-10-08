@@ -1,17 +1,31 @@
 # Git
 .git
-.gitignore
 
-# Python
+# Entorno virtual
 .venv
+
+# Archivos de Python compilados
 __pycache__/
 *.pyc
 *.pyo
 *.pyd
 
-# Docker
-Dockerfile
-
-# IDEs
+# Archivos de configuración de IDEs
 .idea/
 .vscode/
+
+# Archivos de Docker
+Dockerfile
+.dockerignore
+
+# Archivos de Git
+.gitignore
+
+# Documentación y licencias
+README.md
+LICENSE
+
+# Archivos de entorno
+env.txt
+.env
+.env.example

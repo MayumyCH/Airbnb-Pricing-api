@@ -14,8 +14,8 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # --- Configuration ---
-MODEL_NAME = os.getenv("MLFLOW_MODEL_NAME", "airbnb_pricing_model_simple_sevilla")
-MODEL_STAGE = os.getenv("MLFLOW_MODEL_STAGE", "latest")
+MODEL_NAME = os.getenv("MLFLOW_MODEL_NAME")
+MODEL_STAGE = os.getenv("MLFLOW_MODEL_STAGE")
 
 app = FastAPI(
     title="Airbnb Pricing API con MLflow",

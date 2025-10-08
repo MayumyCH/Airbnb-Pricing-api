@@ -1,20 +1,19 @@
-# Usar una imagen base de Python
+# Usa una imagen base de Python
 FROM python:3.9-slim
 
-# Establecer el directorio de trabajo en /app
+# Establece el directorio de trabajo en /app
 WORKDIR /app
 
-# Copiar el archivo de dependencias
+# Copia el archivo de dependencias y las instala
 COPY requirements.txt .
-
-# Instalar las dependencias
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copiar todo el contenido del proyecto al directorio de trabajo
-COPY . .
+# Copia el resto de la aplicación
+COPY ./app /app/app
 
-# Exponer el puerto 80
-EXPOSE 80
+# Expone el puerto 8000 para que la API sea accesible
+EXPOSE 8000
 
-# Comando para ejecutar la aplicación
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "80"]
+# Comando para iniciar la aplicación con uvicorn
+# El host 0.0.0.0 permite que sea accesible desde fuera del contenedor
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
